@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from products.models import Product
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Order, OrderItem
 
 
 class CartItemProductSerializer(serializers.ModelSerializer):
@@ -48,3 +48,37 @@ class CartSerializer(serializers.ModelSerializer):
 class CartMergeItemSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value=1)
+
+
+class OrderItemCreateSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class OrderCreateSerializer(serializers.Serializer):
+    delivery_address = serializers.CharField(min_length=5)
+    items = OrderItemCreateSerializer(many=True, min_length=1)
+
+
+class OrderItemResponseSerializer(serializers.ModelSerializer):
+    line_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['product_id', 'product_name', 'product_price', 'quantity', 'line_price']
+
+    def get_line_price(self, obj):
+        return str(obj.product_price * obj.quantity)
+
+
+class OrderResponseSerializer(serializers.ModelSerializer):
+    order_id = serializers.IntegerField(source='id')
+    items = OrderItemResponseSerializer(many=True, read_only=True)
+    subtotal = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ['order_id', 'order_number', 'items', 'subtotal', 'delivery_address', 'status', 'created_at']
+
+    def get_subtotal(self, obj):
+        return str(obj.subtotal)

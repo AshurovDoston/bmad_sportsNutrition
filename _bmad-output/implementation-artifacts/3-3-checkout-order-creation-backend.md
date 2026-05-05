@@ -1,6 +1,6 @@
 # Story 3.3: Checkout & Order Creation Backend
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -26,54 +26,54 @@ so that my purchase is reliably recorded and I receive immediate proof of my ord
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add `Order` and `OrderItem` models to `backend/orders/models.py` (AC: 1, 2, 3, 4, 5)
-  - [ ] Add `import uuid` at the top of models.py
-  - [ ] Add `generate_order_number()` helper function (see exact implementation in Dev Notes)
-  - [ ] Add `Order` model with fields: `user`, `order_number`, `delivery_address`, `status`, `subtotal`, `created_at` (see full spec in Dev Notes)
-  - [ ] Add `OrderItem` model with fields: `order`, `product`, `product_name`, `product_price`, `quantity` (see full spec in Dev Notes)
-  - [ ] Do NOT modify existing `Cart` or `CartItem` models — only append new models
+- [x] Task 1: Add `Order` and `OrderItem` models to `backend/orders/models.py` (AC: 1, 2, 3, 4, 5)
+  - [x] Add `import uuid` at the top of models.py
+  - [x] Add `generate_order_number()` helper function (see exact implementation in Dev Notes)
+  - [x] Add `Order` model with fields: `user`, `order_number`, `delivery_address`, `status`, `subtotal`, `created_at` (see full spec in Dev Notes)
+  - [x] Add `OrderItem` model with fields: `order`, `product`, `product_name`, `product_price`, `quantity` (see full spec in Dev Notes)
+  - [x] Do NOT modify existing `Cart` or `CartItem` models — only append new models
 
-- [ ] Task 2: Create and run migration (AC: 1)
-  - [ ] Run `python manage.py makemigrations orders` inside the backend Docker container to generate `0002_order_orderitem.py`
-  - [ ] Run `python manage.py migrate` to apply it
-  - [ ] Verify migration is clean with no conflicts
+- [x] Task 2: Create and run migration (AC: 1)
+  - [x] Run `python manage.py makemigrations orders` inside the backend Docker container to generate `0002_order_orderitem.py`
+  - [x] Run `python manage.py migrate` to apply it
+  - [x] Verify migration is clean with no conflicts
 
-- [ ] Task 3: Add Order serializers to `backend/orders/serializers.py` (AC: 2)
-  - [ ] Add `OrderItemCreateSerializer` for request input validation (see Dev Notes for exact definition)
-  - [ ] Add `OrderCreateSerializer` wrapping delivery_address + items list (see Dev Notes)
-  - [ ] Add `OrderItemResponseSerializer` for the response shape (see Dev Notes)
-  - [ ] Add `OrderResponseSerializer` matching exactly `{order_id, order_number, items, subtotal, delivery_address, status, created_at}` (see Dev Notes)
-  - [ ] Do NOT modify existing `CartSerializer`, `CartItemSerializer`, `CartItemProductSerializer`, or `CartMergeItemSerializer`
+- [x] Task 3: Add Order serializers to `backend/orders/serializers.py` (AC: 2)
+  - [x] Add `OrderItemCreateSerializer` for request input validation (see Dev Notes for exact definition)
+  - [x] Add `OrderCreateSerializer` wrapping delivery_address + items list (see Dev Notes)
+  - [x] Add `OrderItemResponseSerializer` for the response shape (see Dev Notes)
+  - [x] Add `OrderResponseSerializer` matching exactly `{order_id, order_number, items, subtotal, delivery_address, status, created_at}` (see Dev Notes)
+  - [x] Do NOT modify existing `CartSerializer`, `CartItemSerializer`, `CartItemProductSerializer`, or `CartMergeItemSerializer`
 
-- [ ] Task 4: Add `OrderCreateView` to `backend/orders/views.py` (AC: 1, 2, 3, 4, 5, 6)
-  - [ ] Add imports: `transaction`, `send_mail`, `uuid` at the top (see Dev Notes for exact import block)
-  - [ ] Implement `OrderCreateView(APIView)` with `permission_classes = [IsAuthenticated]`
-  - [ ] Use `transaction.atomic()` to wrap entire order creation
-  - [ ] Use `select_for_update()` on Product queryset to prevent race conditions (AC: 3, 4)
-  - [ ] Validate each product exists and `is_in_stock` — return 400 with `code: "product_out_of_stock"` on failure (AC: 4)
-  - [ ] Compute `subtotal` as sum of `product.price × quantity` for all items
-  - [ ] Create `Order` with `generate_order_number()`
-  - [ ] Create `OrderItem` for each item (snapshotting `product_name` and `product_price`)
-  - [ ] Decrement `product.stock_quantity` and set `is_in_stock = False` when it reaches 0 (AC: 3)
-  - [ ] Send confirmation email OUTSIDE the transaction (see Dev Notes for email content and `send_mail` call)
-  - [ ] Return `OrderResponseSerializer` with `status=201` (AC: 2)
+- [x] Task 4: Add `OrderCreateView` to `backend/orders/views.py` (AC: 1, 2, 3, 4, 5, 6)
+  - [x] Add imports: `transaction`, `send_mail`, `uuid` at the top (see Dev Notes for exact import block)
+  - [x] Implement `OrderCreateView(APIView)` with `permission_classes = [IsAuthenticated]`
+  - [x] Use `transaction.atomic()` to wrap entire order creation
+  - [x] Use `select_for_update()` on Product queryset to prevent race conditions (AC: 3, 4)
+  - [x] Validate each product exists and `is_in_stock` — return 400 with `code: "product_out_of_stock"` on failure (AC: 4)
+  - [x] Compute `subtotal` as sum of `product.price × quantity` for all items
+  - [x] Create `Order` with `generate_order_number()`
+  - [x] Create `OrderItem` for each item (snapshotting `product_name` and `product_price`)
+  - [x] Decrement `product.stock_quantity` and set `is_in_stock = False` when it reaches 0 (AC: 3)
+  - [x] Send confirmation email OUTSIDE the transaction (see Dev Notes for email content and `send_mail` call)
+  - [x] Return `OrderResponseSerializer` with `status=201` (AC: 2)
 
-- [ ] Task 5: Register the new URL in `backend/orders/urls.py` (AC: 6)
-  - [ ] Add `from .views import ..., OrderCreateView`
-  - [ ] Add `path('orders/', OrderCreateView.as_view(), name='order-create')` to `urlpatterns`
-  - [ ] Verify the existing cart URLs are untouched
+- [x] Task 5: Register the new URL in `backend/orders/urls.py` (AC: 6)
+  - [x] Add `from .views import ..., OrderCreateView`
+  - [x] Add `path('orders/', OrderCreateView.as_view(), name='order-create')` to `urlpatterns`
+  - [x] Verify the existing cart URLs are untouched
 
-- [ ] Task 6: Update `backend/.env.example` to document email backend (AC: 5)
-  - [ ] Add a comment block documenting `EMAIL_BACKEND` options (see Dev Notes for exact text)
+- [x] Task 6: Update `backend/.env.example` to document email backend (AC: 5)
+  - [x] Add a comment block documenting `EMAIL_BACKEND` options (see Dev Notes for exact text)
 
-- [ ] Task 7: Write tests in `backend/orders/tests.py` (AC: 1, 2, 3, 4, 6)
-  - [ ] Add `ORDERS_URL = '/api/v1/orders/'` constant alongside existing URL constants
-  - [ ] Add `OrderAuthTests` class — unauthenticated POST returns 401 (AC: 6)
-  - [ ] Add `OrderCreateTests` class — successful creation, correct response shape, stock decremented (AC: 1, 2, 3)
-  - [ ] Add `OrderOutOfStockTests` class — out-of-stock product returns 400, no order created (AC: 4)
-  - [ ] Add `OrderAtomicTests` class — transaction rollback on partial failure (AC: 1)
-  - [ ] Use `@override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')` on test class to suppress console output (see Dev Notes)
-  - [ ] Reuse existing `make_user()` and `make_product()` helper functions — do NOT redefine them
+- [x] Task 7: Write tests in `backend/orders/tests.py` (AC: 1, 2, 3, 4, 6)
+  - [x] Add `ORDERS_URL = '/api/v1/orders/'` constant alongside existing URL constants
+  - [x] Add `OrderAuthTests` class — unauthenticated POST returns 401 (AC: 6)
+  - [x] Add `OrderCreateTests` class — successful creation, correct response shape, stock decremented (AC: 1, 2, 3)
+  - [x] Add `OrderOutOfStockTests` class — out-of-stock product returns 400, no order created (AC: 4)
+  - [x] Add `OrderAtomicTests` class — transaction rollback on partial failure (AC: 1)
+  - [x] Use `@override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')` on test class to suppress console output (see Dev Notes)
+  - [x] Reuse existing `make_user()` and `make_product()` helper functions — do NOT redefine them
 
 ## Dev Notes
 
@@ -567,8 +567,27 @@ None.
 
 ### Completion Notes List
 
+Implemented full checkout & order creation backend. All 6 ACs satisfied:
+- Order + OrderItem models appended to models.py (AC 1, 2, 3, 4, 5)
+- Migration 0002_order_orderitem generated and applied cleanly
+- 4 serializer classes appended to serializers.py (AC 2)
+- OrderCreateView with atomic transaction, select_for_update, stock decrement, and console email appended to views.py (AC 1–5)
+- URL registered at POST /api/v1/orders/ (AC 6)
+- .env.example updated with EMAIL_BACKEND documentation (AC 5)
+- 13 new tests across 4 classes; all 32 tests pass with zero regressions
+- Fixed story test bug: delivery_address 'Addr' (4 chars) fails min_length=5; corrected to 'Addr1'
+
 ### File List
+
+- backend/orders/models.py
+- backend/orders/serializers.py
+- backend/orders/views.py
+- backend/orders/urls.py
+- backend/orders/tests.py
+- backend/orders/migrations/0002_order_orderitem.py
+- backend/.env.example
 
 ## Change Log
 
 - 2026-05-05: Story 3.3 created — comprehensive checkout & order creation backend implementation guide
+- 2026-05-06: Story 3.3 implemented — Order/OrderItem models, serializers, OrderCreateView, URL, migration, tests; 32/32 tests pass

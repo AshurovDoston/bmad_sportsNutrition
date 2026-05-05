@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 from accounts.models import CustomUser
@@ -184,3 +184,134 @@ class CartMergeTests(TestCase):
         res = self.client.post(CART_MERGE_URL, [], format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data['items']), 1)
+
+
+ORDERS_URL = '/api/v1/orders/'
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')
+class OrderAuthTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_post_order_requires_auth(self):
+        res = self.client.post(ORDERS_URL, {}, format='json')
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')
+class OrderCreateTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user()
+        self.client.force_authenticate(user=self.user)
+        self.p1 = make_product(name='Whey', slug='whey-order', price='29.99', stock_quantity=10)
+        self.p2 = make_product(name='Creatine', slug='creatine-order', price='19.99', stock_quantity=5)
+
+    def _payload(self, items=None, address='Tashkent, Test Street 1'):
+        return {
+            'delivery_address': address,
+            'items': items or [
+                {'product_id': self.p1.id, 'quantity': 2},
+                {'product_id': self.p2.id, 'quantity': 1},
+            ],
+        }
+
+    def test_create_order_returns_201(self):
+        res = self.client.post(ORDERS_URL, self._payload(), format='json')
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_response_contains_required_fields(self):
+        res = self.client.post(ORDERS_URL, self._payload(), format='json')
+        for field in ['order_id', 'order_number', 'items', 'subtotal', 'delivery_address', 'status', 'created_at']:
+            self.assertIn(field, res.data)
+
+    def test_order_status_is_pending(self):
+        res = self.client.post(ORDERS_URL, self._payload(), format='json')
+        self.assertEqual(res.data['status'], 'pending')
+
+    def test_order_number_format(self):
+        res = self.client.post(ORDERS_URL, self._payload(), format='json')
+        self.assertTrue(res.data['order_number'].startswith('ORD-'))
+
+    def test_order_and_items_persisted(self):
+        res = self.client.post(ORDERS_URL, self._payload(), format='json')
+        from .models import Order, OrderItem
+        self.assertTrue(Order.objects.filter(id=res.data['order_id']).exists())
+        self.assertEqual(OrderItem.objects.filter(order_id=res.data['order_id']).count(), 2)
+
+    def test_stock_decremented(self):
+        self.client.post(ORDERS_URL, self._payload(), format='json')
+        self.p1.refresh_from_db()
+        self.p2.refresh_from_db()
+        self.assertEqual(self.p1.stock_quantity, 8)  # 10 - 2
+        self.assertEqual(self.p2.stock_quantity, 4)  # 5 - 1
+
+    def test_stock_hits_zero_marks_out_of_stock(self):
+        p = make_product(name='LowStock', slug='low-stock', price='9.99', stock_quantity=1)
+        payload = {'delivery_address': 'Addr1', 'items': [{'product_id': p.id, 'quantity': 1}]}
+        self.client.post(ORDERS_URL, payload, format='json')
+        p.refresh_from_db()
+        self.assertEqual(p.stock_quantity, 0)
+        self.assertFalse(p.is_in_stock)
+
+    def test_subtotal_correct(self):
+        res = self.client.post(ORDERS_URL, self._payload(), format='json')
+        # p1: 29.99 × 2 = 59.98; p2: 19.99 × 1 = 19.99; total = 79.97
+        self.assertEqual(res.data['subtotal'], '79.97')
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')
+class OrderOutOfStockTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user()
+        self.client.force_authenticate(user=self.user)
+
+    def test_out_of_stock_returns_400(self):
+        oos = make_product(name='OOS', slug='oos-order', in_stock=False, stock_quantity=0)
+        payload = {'delivery_address': 'Addr1', 'items': [{'product_id': oos.id, 'quantity': 1}]}
+        res = self.client.post(ORDERS_URL, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.data['code'], 'product_out_of_stock')
+
+    def test_out_of_stock_no_order_created(self):
+        from .models import Order
+        oos = make_product(name='OOS2', slug='oos-order2', in_stock=False, stock_quantity=0)
+        payload = {'delivery_address': 'Addr1', 'items': [{'product_id': oos.id, 'quantity': 1}]}
+        self.client.post(ORDERS_URL, payload, format='json')
+        self.assertEqual(Order.objects.count(), 0)
+
+    def test_quantity_exceeds_stock_returns_400(self):
+        p = make_product(name='Partial', slug='partial-stock', price='9.99', stock_quantity=2)
+        payload = {'delivery_address': 'Addr1', 'items': [{'product_id': p.id, 'quantity': 5}]}
+        res = self.client.post(ORDERS_URL, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.data['code'], 'product_out_of_stock')
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')
+class OrderAtomicTests(TestCase):
+    """Verifies the transaction is all-or-nothing — partial order creation is impossible."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user()
+        self.client.force_authenticate(user=self.user)
+
+    def test_no_partial_order_if_second_item_out_of_stock(self):
+        from .models import Order
+        good = make_product(name='Good', slug='good-atomic', price='9.99', stock_quantity=5)
+        oos = make_product(name='OOS', slug='oos-atomic', in_stock=False, stock_quantity=0)
+        payload = {
+            'delivery_address': 'Addr1',
+            'items': [
+                {'product_id': good.id, 'quantity': 1},
+                {'product_id': oos.id, 'quantity': 1},
+            ],
+        }
+        res = self.client.post(ORDERS_URL, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Order.objects.count(), 0)
+        good.refresh_from_db()
+        self.assertEqual(good.stock_quantity, 5)  # not decremented
