@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 import { refreshAccessToken } from '@/lib/auth'
 import type { GoalCategory, ProductListItem, ProductDetailItem, PaginatedResponse, ProductsQueryParams } from '@/types/product'
+import type { ConfusionEntry } from '@/types/content'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -84,6 +85,18 @@ export async function getProductDetail(slug: string): Promise<ProductDetailItem>
     certificate_url: toPublicUrl(data.certificate_url),
     images: data.images.map((img) => ({ ...img, image_url: toPublicUrl(img.image_url) })),
   }
+}
+
+export const CONTENT_ENDPOINTS = {
+  CONFUSION: '/api/v1/confusion/',
+} as const
+
+export async function getConfusionEntries(): Promise<ConfusionEntry[]> {
+  const res = await fetch(`${serverApiBase}${CONTENT_ENDPOINTS.CONFUSION}`, {
+    cache: 'force-cache',
+  })
+  if (!res.ok) throw new Error('Failed to fetch confusion entries')
+  return res.json() as Promise<ConfusionEntry[]>
 }
 
 export async function getProducts(params?: ProductsQueryParams): Promise<PaginatedResponse<ProductListItem>> {

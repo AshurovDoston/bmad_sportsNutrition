@@ -1,8 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-
-router = DefaultRouter()
+from django.urls import path
+from .views import ConfusionEntryListView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('confusion/', ConfusionEntryListView.as_view(), name='confusion-list'),
 ]

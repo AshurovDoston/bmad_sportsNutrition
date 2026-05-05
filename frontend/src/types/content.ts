@@ -6,8 +6,16 @@ export interface BlogArticle {
   published_at: string
 }
 
+export interface ConfusionRecommendedProduct {
+  id: number
+  name: string
+  slug: string
+  price: string
+}
+
 export interface ConfusionEntry {
   id: number
   question: string
   answer: string
+  recommended_products: ConfusionRecommendedProduct[]
 }
