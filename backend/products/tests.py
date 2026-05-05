@@ -1,6 +1,8 @@
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
+from content.models import ConfusionEntry
 from .models import GoalCategory, Product, ProductGoalTag
 
 GOALS_URL = '/api/v1/goals/'
@@ -152,3 +154,43 @@ class SchemaEndpointTests(TestCase):
     def test_schema_endpoint_returns_200(self):
         res = self.client.get('/api/v1/schema/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+
+class SeedDataCommandTests(TestCase):
+    def test_seed_creates_goals(self):
+        call_command('seed_data', verbosity=0)
+        self.assertEqual(GoalCategory.objects.count(), 4)
+
+    def test_seed_creates_50_plus_products(self):
+        call_command('seed_data', verbosity=0)
+        self.assertGreaterEqual(Product.objects.count(), 50)
+
+    def test_seed_min_10_products_per_goal(self):
+        call_command('seed_data', verbosity=0)
+        for goal in GoalCategory.objects.all():
+            count = Product.objects.filter(goal_categories=goal).count()
+            self.assertGreaterEqual(count, 10, msg=f'Goal {goal.slug} has only {count} products')
+
+    def test_seed_each_product_has_3_reviews(self):
+        call_command('seed_data', verbosity=0)
+        for product in Product.objects.all():
+            self.assertGreaterEqual(product.reviews.count(), 3, msg=f'{product.slug} has too few reviews')
+
+    def test_seed_confusion_entries(self):
+        call_command('seed_data', verbosity=0)
+        self.assertGreaterEqual(ConfusionEntry.objects.count(), 5)
+
+    def test_seed_is_idempotent(self):
+        call_command('seed_data', verbosity=0)
+        first_product_count = Product.objects.count()
+        first_goal_count = GoalCategory.objects.count()
+        call_command('seed_data', verbosity=0)
+        self.assertEqual(Product.objects.count(), first_product_count)
+        self.assertEqual(GoalCategory.objects.count(), first_goal_count)
+
+    def test_seed_products_in_stock(self):
+        call_command('seed_data', verbosity=0)
+        out_of_stock = Product.objects.filter(is_in_stock=False).count()
+        zero_stock = Product.objects.filter(stock_quantity=0).count()
+        self.assertEqual(out_of_stock, 0)
+        self.assertEqual(zero_stock, 0)
