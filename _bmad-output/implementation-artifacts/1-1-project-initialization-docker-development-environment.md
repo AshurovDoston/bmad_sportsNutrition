@@ -1,6 +1,6 @@
 # Story 1.1: Project Initialization & Docker Development Environment
 
-Status: review
+Status: done
 
 ## Story
 
@@ -50,6 +50,16 @@ so that development can start immediately with a consistent, reproducible enviro
   - [x] Create `src/middleware.ts` placeholder (guards `/account/*` and `/admin/*`)
 
 - [x] Task 4: Verify (AC: all)
+
+### Review Findings
+
+- [x] [Review][Patch] docker-compose race condition: backend starts before postgres is ready [docker-compose.yml] — **fixed**: added `pg_isready` healthcheck to `db` service, changed `depends_on` to `condition: service_healthy`
+- [x] [Review][Patch] layout.tsx metadata shows Create Next App defaults [frontend/src/app/layout.tsx:16-18] — **fixed**: updated title/description to project branding
+- [x] [Review][Patch] page.tsx is unmodified create-next-app template [frontend/src/app/page.tsx] — **fixed**: replaced with minimal project placeholder
+- [x] [Review][Defer] prod.py missing ALLOWED_HOSTS [backend/core/settings/prod.py] — deferred to Story 5 (production infra)
+- [x] [Review][Defer] unpinned versions in requirements.txt [backend/requirements.txt] — deferred post-Story-1.2
+- [x] [Review][Defer] python-dotenv installed but load_dotenv() never called [backend/requirements.txt] — Docker env_file handles it; deferred
+- [x] [Review][Defer] unused `include` import in core/urls.py [backend/core/urls.py:1] — will be used when domain URLs wired in future stories
   - [x] `docker-compose up -d` — all three services reach healthy/running state
   - [x] `curl localhost:8000/api/v1/health/` returns `{"status": "ok"}` with HTTP 200
   - [x] `curl localhost:3000` returns Next.js default page (HTTP 200)
