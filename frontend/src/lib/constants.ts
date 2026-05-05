@@ -1,10 +1,10 @@
 export const DELIVERY_TIME_HOURS = 2
 
 export const GOAL_CATEGORIES = [
-  { slug: 'muscle-gain', label: 'Muscle Gain' },
-  { slug: 'weight-loss', label: 'Weight Loss' },
+  { slug: 'muscle_gain', label: 'Muscle Gain' },
+  { slug: 'fat_loss', label: 'Fat Loss' },
   { slug: 'endurance', label: 'Endurance' },
-  { slug: 'recovery', label: 'Recovery' },
+  { slug: 'general_health', label: 'General Health' },
 ] as const
 
-export type GoalCategory = typeof GOAL_CATEGORIES[number]['slug']
+export type GoalSlug = typeof GOAL_CATEGORIES[number]['slug']

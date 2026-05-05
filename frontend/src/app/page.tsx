@@ -1,14 +1,17 @@
+import { GoalSelector } from '@/components/features/products/goal-selector'
+
 export default function Home() {
   return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="text-center">
+    <main className="container mx-auto px-4 py-16">
+      <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Sports Nutrition
+          What&apos;s your fitness goal?
         </h1>
-        <p className="mt-4 text-lg text-zinc-500 dark:text-zinc-400">
-          Your goal-based nutrition store. Coming soon.
+        <p className="mt-3 text-lg text-zinc-500 dark:text-zinc-400">
+          Choose a goal and discover products curated just for you.
         </p>
       </div>
-    </div>
-  );
+      <GoalSelector />
+    </main>
+  )
 }
