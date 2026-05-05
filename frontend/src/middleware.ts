@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  // Auth guard implemented in Story 1.3
+  const refreshToken = request.cookies.get('refresh_token')
+  if (!refreshToken) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
   return NextResponse.next()
 }
 

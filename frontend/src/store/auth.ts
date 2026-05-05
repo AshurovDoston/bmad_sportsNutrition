@@ -1,11 +1,18 @@
 import { create } from 'zustand'
+import { User } from '@/types/user'
 
-interface AuthState {
+interface AuthStore {
   accessToken: string | null
-  setAccessToken: (token: string | null) => void
+  user: User | null
+  setAuth: (token: string, user: User | null) => void
+  clearAuth: () => void
+  isAuthenticated: () => boolean
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   accessToken: null,
-  setAccessToken: (token) => set({ accessToken: token }),
+  user: null,
+  setAuth: (token, user) => set({ accessToken: token, user }),
+  clearAuth: () => set({ accessToken: null, user: null }),
+  isAuthenticated: () => get().accessToken !== null,
 }))
