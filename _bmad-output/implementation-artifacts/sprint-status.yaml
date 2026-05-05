@@ -36,7 +36,7 @@
 
 generated: 2026-05-05
 last_updated: 2026-05-05
-project: bmad_sportsNutrition  # code review completed
+project: bmad_sportsNutrition  # story 2.1 ready for review
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -51,8 +51,8 @@ development_status:
   epic-1-retrospective: optional
 
   # ── Epic 2: Product Discovery & Goal-Based Navigation ─────────────────────
-  epic-2: backlog
-  2-1-product-goal-catalog-backend-api: backlog
+  epic-2: in-progress
+  2-1-product-goal-catalog-backend-api: review
   2-2-demo-data-seeding: backlog
   2-3-homepage-goal-selector-isr-product-listing: backlog
   2-4-product-detail-page-ssr: backlog
