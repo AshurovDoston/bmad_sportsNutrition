@@ -2,6 +2,7 @@ import { useAuthStore } from '@/store/auth'
 import { refreshAccessToken } from '@/lib/auth'
 import type { GoalCategory, ProductListItem, ProductDetailItem, PaginatedResponse, ProductsQueryParams } from '@/types/product'
 import type { ConfusionEntry } from '@/types/content'
+import type { ServerCart } from '@/types/order'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -97,6 +98,54 @@ export async function getConfusionEntries(): Promise<ConfusionEntry[]> {
   })
   if (!res.ok) throw new Error('Failed to fetch confusion entries')
   return res.json() as Promise<ConfusionEntry[]>
+}
+
+export const CART_ENDPOINTS = {
+  CART: '/api/v1/cart/',
+  ITEMS: '/api/v1/cart/items/',
+  ITEM: (id: number) => `/api/v1/cart/items/${id}/`,
+  MERGE: '/api/v1/cart/merge/',
+} as const
+
+export async function getServerCart(): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.CART)
+  if (!res.ok) throw new Error('Failed to fetch cart')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function addServerCartItem(productId: number, quantity: number): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.ITEMS, {
+    method: 'POST',
+    body: JSON.stringify({ product_id: productId, quantity }),
+  })
+  if (!res.ok) throw new Error('Failed to add item')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function updateServerCartItem(itemId: number, quantity: number): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.ITEM(itemId), {
+    method: 'PATCH',
+    body: JSON.stringify({ quantity }),
+  })
+  if (!res.ok) throw new Error('Failed to update item')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function removeServerCartItem(itemId: number): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.ITEM(itemId), { method: 'DELETE' })
+  if (!res.ok) throw new Error('Failed to remove item')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function mergeServerCart(
+  items: Array<{ product_id: number; quantity: number }>
+): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.MERGE, {
+    method: 'POST',
+    body: JSON.stringify(items),
+  })
+  if (!res.ok) throw new Error('Failed to merge cart')
+  return res.json() as Promise<ServerCart>
 }
 
 export async function getProducts(params?: ProductsQueryParams): Promise<PaginatedResponse<ProductListItem>> {
