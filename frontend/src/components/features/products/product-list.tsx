@@ -8,10 +8,14 @@ import { ProductCard } from './product-card'
 export function ProductList() {
   const searchParams = useSearchParams()
   const goal = searchParams.get('goal') ?? undefined
+  const search = searchParams.get('search') ?? undefined
+  const brand = searchParams.get('brand') ?? undefined
+  const minPrice = searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined
+  const maxPrice = searchParams.get('max_price') ? Number(searchParams.get('max_price')) : undefined
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['products', { goal }],
-    queryFn: () => getProducts({ goal }),
+    queryKey: ['products', { goal, search, brand, minPrice, maxPrice }],
+    queryFn: () => getProducts({ goal, search, brand, min_price: minPrice, max_price: maxPrice }),
   })
 
   if (isLoading) {

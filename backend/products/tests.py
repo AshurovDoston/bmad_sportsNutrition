@@ -117,6 +117,24 @@ class ProductListTests(TestCase):
         self.assertNotEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
+    def test_search_by_name_returns_matching_products(self):
+        make_product(name='Gold Standard Whey', slug='gold-whey', brand='Optimum')
+        make_product(name='Creatine Monohydrate', slug='creatine', brand='MuscleTech')
+        res = self.client.get(PRODUCTS_URL, {'search': 'Whey'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        names = [p['name'] for p in res.data['results']]
+        self.assertIn('Gold Standard Whey', names)
+        self.assertNotIn('Creatine Monohydrate', names)
+
+    def test_search_by_brand_returns_matching_products(self):
+        make_product(name='Gold Standard Whey', slug='gold-whey', brand='Optimum')
+        make_product(name='Creatine Monohydrate', slug='creatine', brand='MuscleTech')
+        res = self.client.get(PRODUCTS_URL, {'search': 'MuscleTech'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        names = [p['name'] for p in res.data['results']]
+        self.assertIn('Creatine Monohydrate', names)
+        self.assertNotIn('Gold Standard Whey', names)
+
 
 class ProductDetailTests(TestCase):
     def setUp(self):

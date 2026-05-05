@@ -89,6 +89,7 @@ export async function getProductDetail(slug: string): Promise<ProductDetailItem>
 export async function getProducts(params?: ProductsQueryParams): Promise<PaginatedResponse<ProductListItem>> {
   const query = new URLSearchParams()
   if (params?.goal) query.set('goal', params.goal)
+  if (params?.search) query.set('search', params.search)
   if (params?.brand) query.set('brand', params.brand)
   if (params?.min_price != null) query.set('min_price', String(params.min_price))
   if (params?.max_price != null) query.set('max_price', String(params.max_price))

@@ -1,5 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
+from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import GoalCategory, Product
 from .serializers import GoalCategorySerializer, ProductListSerializer, ProductDetailSerializer
@@ -16,8 +17,9 @@ class GoalListView(ListAPIView):
 class ProductListView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ProductFilter
+    search_fields = ['name', 'brand']
 
     def get_queryset(self):
         return Product.objects.prefetch_related(

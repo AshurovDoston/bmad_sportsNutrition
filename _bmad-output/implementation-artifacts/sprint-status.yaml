@@ -36,7 +36,7 @@
 
 generated: 2026-05-05
 last_updated: 2026-05-05
-project: bmad_sportsNutrition  # story 2.4 review
+project: bmad_sportsNutrition  # story 2.5 ready for review
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -56,7 +56,7 @@ development_status:
   2-2-demo-data-seeding: review
   2-3-homepage-goal-selector-isr-product-listing: review
   2-4-product-detail-page-ssr: review
-  2-5-product-search-advanced-filtering: backlog
+  2-5-product-search-advanced-filtering: review
   2-6-confusion-resolver-pages-ssg: backlog
   epic-2-retrospective: optional
 

@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import { GoalSelector } from '@/components/features/products/goal-selector'
 import { ProductList } from '@/components/features/products/product-list'
+import { SearchBar } from '@/components/features/products/search-bar'
+import { FilterPanel } from '@/components/features/products/filter-panel'
 
 export const revalidate = 60
 
@@ -11,7 +13,9 @@ export default function ProductsPage() {
       <div className="mb-8">
         <GoalSelector />
       </div>
-      <Suspense fallback={<div className="animate-pulse text-zinc-400">Loading products...</div>}>
+      <Suspense fallback={<div className="animate-pulse text-zinc-400">Loading...</div>}>
+        <SearchBar />
+        <FilterPanel />
         <ProductList />
       </Suspense>
     </main>

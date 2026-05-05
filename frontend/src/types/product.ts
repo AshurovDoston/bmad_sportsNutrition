@@ -41,6 +41,7 @@ export interface PaginatedResponse<T> {
 
 export interface ProductsQueryParams {
   goal?: string
+  search?: string
   brand?: string
   min_price?: number
   max_price?: number
