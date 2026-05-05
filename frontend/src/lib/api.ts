@@ -12,6 +12,7 @@ export const AUTH_ENDPOINTS = {
   LOGIN: '/api/v1/auth/login/',
   LOGOUT: '/api/v1/auth/logout/',
   REFRESH: '/api/v1/auth/token/refresh/',
+  PROFILE: '/api/v1/auth/profile/',
 } as const
 
 export async function apiFetch(

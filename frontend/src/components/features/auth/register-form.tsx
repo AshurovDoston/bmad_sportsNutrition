@@ -56,6 +56,7 @@ export function RegisterForm() {
         name: register.name,
         phone: register.phone,
         is_staff: false,
+        delivery_address: null,
       })
       router.push('/')
     },

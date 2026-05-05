@@ -3,6 +3,13 @@ export interface User {
   name: string
   phone: string
   is_staff: boolean
+  delivery_address: string | null
+}
+
+export interface ProfileUpdatePayload {
+  name?: string
+  phone?: string
+  delivery_address?: string | null
 }
 
 export interface LoginResponse {

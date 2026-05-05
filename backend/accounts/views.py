@@ -82,6 +82,23 @@ class LogoutView(APIView):
         return response
 
 
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(UserProfileSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(
+                {'error': 'Validation failed', 'code': 'validation_error', 'details': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer.save()
+        return Response(serializer.data)
+
+
 class CookieTokenRefreshView(APIView):
     permission_classes = []
 

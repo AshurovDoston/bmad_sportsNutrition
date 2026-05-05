@@ -9,6 +9,7 @@ REGISTER_URL = '/api/v1/auth/register/'
 LOGIN_URL = '/api/v1/auth/login/'
 LOGOUT_URL = '/api/v1/auth/logout/'
 REFRESH_URL = '/api/v1/auth/token/refresh/'
+PROFILE_URL = '/api/v1/auth/profile/'
 
 
 def make_user(phone='998901234567', password='testpass123', name='Test User'):
@@ -100,3 +101,44 @@ class TokenRefreshTests(TestCase):
         res = self.client.post(REFRESH_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(res.data['code'], 'token_invalid')
+
+
+class ProfileTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user(phone='998901234567', name='Test User')
+        self.other_user = make_user(phone='998900000001', name='Other User')
+        self.client.force_authenticate(user=self.user)
+
+    def test_get_profile_authenticated_returns_200_with_delivery_address(self):
+        res = self.client.get(PROFILE_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('id', res.data)
+        self.assertIn('name', res.data)
+        self.assertIn('phone', res.data)
+        self.assertIn('delivery_address', res.data)
+        self.assertNotIn('password', res.data)
+
+    def test_get_profile_unauthenticated_returns_401(self):
+        self.client.force_authenticate(user=None)
+        res = self.client.get(PROFILE_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_patch_profile_delivery_address_updates_only_that_field(self):
+        res = self.client.patch(PROFILE_URL, {'delivery_address': '123 Main St'}, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['delivery_address'], '123 Main St')
+        self.assertEqual(res.data['name'], 'Test User')
+        self.assertEqual(res.data['phone'], '998901234567')
+
+    def test_patch_profile_duplicate_phone_returns_400_with_code(self):
+        res = self.client.patch(PROFILE_URL, {'phone': '998900000001'}, format='json')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.data['code'], 'validation_error')
+        details_str = str(res.data['details'])
+        self.assertIn('phone_already_registered', details_str)
+
+    def test_patch_profile_unauthenticated_returns_401(self):
+        self.client.force_authenticate(user=None)
+        res = self.client.patch(PROFILE_URL, {'name': 'Hacker'}, format='json')
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

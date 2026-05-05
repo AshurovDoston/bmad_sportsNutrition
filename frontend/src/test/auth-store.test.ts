@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { useAuthStore } from '@/store/auth'
 import { User } from '@/types/user'
 
-const mockUser: User = { id: 1, name: 'Test User', phone: '+1234567890', is_staff: false }
+const mockUser: User = { id: 1, name: 'Test User', phone: '+1234567890', is_staff: false, delivery_address: null }
 
 beforeEach(() => {
   useAuthStore.getState().clearAuth()

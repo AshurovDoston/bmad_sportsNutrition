@@ -34,8 +34,23 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'name', 'phone']
-        read_only_fields = ['id', 'name', 'phone']
+        fields = ['id', 'name', 'phone', 'delivery_address']
+        read_only_fields = ['id']
+        extra_kwargs = {
+            'phone': {'validators': []},
+        }
+
+    def validate_phone(self, value):
+        qs = CustomUser.objects.filter(phone=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError({
+                'error': 'Phone already registered',
+                'code': 'phone_already_registered',
+                'details': {},
+            })
+        return value
 
 
 class LoginSerializer(serializers.Serializer):
