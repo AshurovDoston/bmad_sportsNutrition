@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/auth'
 import { refreshAccessToken } from '@/lib/auth'
-import type { GoalCategory, ProductListItem, PaginatedResponse, ProductsQueryParams } from '@/types/product'
+import type { GoalCategory, ProductListItem, ProductDetailItem, PaginatedResponse, ProductsQueryParams } from '@/types/product'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -59,6 +59,31 @@ export async function getGoals(): Promise<GoalCategory[]> {
   const res = await apiFetch(PRODUCT_ENDPOINTS.GOALS)
   if (!res.ok) throw new Error('Failed to fetch goals')
   return res.json() as Promise<GoalCategory[]>
+}
+
+const serverApiBase = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const publicApiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+// Django builds absolute image URLs using the request host (serverApiBase).
+// Rewrite them to the public host so the browser can load them.
+function toPublicUrl(url: string | null): string | null {
+  if (!url || serverApiBase === publicApiBase) return url
+  return url.replace(serverApiBase, publicApiBase)
+}
+
+export async function getProductDetail(slug: string): Promise<ProductDetailItem> {
+  const res = await fetch(`${serverApiBase}${PRODUCT_ENDPOINTS.PRODUCT_DETAIL(slug)}`, {
+    cache: 'no-store',
+  })
+  if (res.status === 404) throw new Error('NOT_FOUND')
+  if (!res.ok) throw new Error('Failed to fetch product detail')
+  const data = await res.json() as ProductDetailItem
+  return {
+    ...data,
+    primary_image_url: toPublicUrl(data.primary_image_url),
+    certificate_url: toPublicUrl(data.certificate_url),
+    images: data.images.map((img) => ({ ...img, image_url: toPublicUrl(img.image_url) })),
+  }
 }
 
 export async function getProducts(params?: ProductsQueryParams): Promise<PaginatedResponse<ProductListItem>> {
