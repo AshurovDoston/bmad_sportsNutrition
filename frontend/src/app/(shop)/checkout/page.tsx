@@ -10,6 +10,7 @@ import MockPaymentForm from '@/components/features/checkout/mock-payment-form'
 import type { CheckoutFormData } from '@/components/features/checkout/checkout-form'
 import type { MockPaymentData } from '@/components/features/checkout/mock-payment-form'
 import type { ApiError } from '@/types/user'
+import { Container } from '@/components/layout/container'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -83,26 +84,28 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-8">Checkout</h1>
+    <Container className="py-12">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-8">Checkout</h1>
 
-      {step === 'address' && (
-        <CheckoutForm
-          isGuest={!isAuth}
-          defaultAddress={user?.delivery_address}
-          onSubmit={handleAddressSubmit}
-          isLoading={isLoading}
-        />
-      )}
+        {step === 'address' && (
+          <CheckoutForm
+            isGuest={!isAuth}
+            defaultAddress={user?.delivery_address}
+            onSubmit={handleAddressSubmit}
+            isLoading={isLoading}
+          />
+        )}
 
-      {step === 'payment' && (
-        <MockPaymentForm
-          onSubmit={submitOrder}
-          onBack={() => setStep('address')}
-          isLoading={isLoading}
-          error={paymentError}
-        />
-      )}
-    </main>
+        {step === 'payment' && (
+          <MockPaymentForm
+            onSubmit={submitOrder}
+            onBack={() => setStep('address')}
+            isLoading={isLoading}
+            error={paymentError}
+          />
+        )}
+      </div>
+    </Container>
   )
 }

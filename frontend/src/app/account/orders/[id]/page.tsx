@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getOrderDetail } from '@/lib/api'
 import type { OrderResponse } from '@/types/order'
+import { Container } from '@/components/layout/container'
 
 const STATUS_STYLES: Record<OrderResponse['status'], string> = {
   pending: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
@@ -45,20 +46,23 @@ export default function OrderDetailPage() {
 
   if (!isValidId) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-sm text-red-600 dark:text-red-400">Invalid order id.</p>
-        <Link
-          href="/account/orders"
-          className="mt-4 inline-block text-sm text-zinc-600 dark:text-zinc-400 hover:underline"
-        >
-          ← Back to Orders
-        </Link>
-      </main>
+      <Container className="py-12">
+        <div className="mx-auto max-w-3xl">
+          <p className="text-sm text-red-600 dark:text-red-400">Invalid order id.</p>
+          <Link
+            href="/account/orders"
+            className="mt-4 inline-block text-sm text-zinc-600 dark:text-zinc-400 hover:underline"
+          >
+            ← Back to Orders
+          </Link>
+        </div>
+      </Container>
     )
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <Container className="py-12">
+      <div className="mx-auto max-w-3xl">
       <Link
         href="/account/orders"
         className="mb-6 inline-block text-sm text-zinc-600 dark:text-zinc-400 hover:underline"
@@ -127,6 +131,7 @@ export default function OrderDetailPage() {
           </section>
         </article>
       )}
-    </main>
+      </div>
+    </Container>
   )
 }

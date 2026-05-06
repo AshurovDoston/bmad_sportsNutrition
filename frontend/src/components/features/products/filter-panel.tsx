@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 
 export function FilterPanel() {
   const router = useRouter()
@@ -104,12 +105,9 @@ export function FilterPanel() {
         />
       </div>
       {hasActiveFilters && (
-        <button
-          onClick={handleClearFilters}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
-        >
+        <Button variant="secondary" size="md" onClick={handleClearFilters}>
           Clear filters
-        </button>
+        </Button>
       )}
     </div>
   )
