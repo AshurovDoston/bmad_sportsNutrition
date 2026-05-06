@@ -1,6 +1,6 @@
 # Story 3.4: Checkout Frontend — Address, Mock Payment & Order Confirmation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,69 +28,69 @@ so that I can complete my purchase quickly and confidently.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Extend `frontend/src/types/order.ts` with order response types (AC: 4, 5, 6)
-  - [ ] ADD `OrderItemResponse` interface (do NOT remove or rename existing `OrderItem` — it may be used by story 3.5)
-  - [ ] ADD `OrderResponse` interface matching the exact `OrderResponseSerializer` shape
-  - [ ] ADD `PendingGuestOrder` interface for client-side guest checkout storage
+- [x] Task 1: Extend `frontend/src/types/order.ts` with order response types (AC: 4, 5, 6)
+  - [x] ADD `OrderItemResponse` interface (do NOT remove or rename existing `OrderItem` — it may be used by story 3.5)
+  - [x] ADD `OrderResponse` interface matching the exact `OrderResponseSerializer` shape
+  - [x] ADD `PendingGuestOrder` interface for client-side guest checkout storage
 
-- [ ] Task 2: Add order API functions to `frontend/src/lib/api.ts` (AC: 4)
-  - [ ] ADD `ORDER_ENDPOINTS` const object (after `CART_ENDPOINTS`)
-  - [ ] ADD `createOrder` async function using `apiFetch` — NOT raw fetch
-  - [ ] ADD `loginUser` helper function for the guest auto-login step (if not already present)
+- [x] Task 2: Add order API functions to `frontend/src/lib/api.ts` (AC: 4)
+  - [x] ADD `ORDER_ENDPOINTS` const object (after `CART_ENDPOINTS`)
+  - [x] ADD `createOrder` async function using `apiFetch` — NOT raw fetch
+  - [x] ADD `loginUser` helper function for the guest auto-login step (if not already present)
 
-- [ ] Task 3: Create `frontend/src/components/features/checkout/checkout-form.tsx` (AC: 1, 2)
-  - [ ] `'use client'` directive
-  - [ ] Props: `{ isGuest: boolean; defaultAddress?: string | null; onSubmit: (data: CheckoutFormData) => void; isLoading: boolean }`
-  - [ ] Registered user: shows only `delivery_address` field, pre-filled with `defaultAddress`
-  - [ ] Guest: shows `name`, `phone`, `delivery_address` fields
-  - [ ] "Continue to Payment" button — disabled while `isLoading`
-  - [ ] All field validation: non-empty strings; `delivery_address` min 5 chars
+- [x] Task 3: Create `frontend/src/components/features/checkout/checkout-form.tsx` (AC: 1, 2)
+  - [x] `'use client'` directive
+  - [x] Props: `{ isGuest: boolean; defaultAddress?: string | null; onSubmit: (data: CheckoutFormData) => void; isLoading: boolean }`
+  - [x] Registered user: shows only `delivery_address` field, pre-filled with `defaultAddress`
+  - [x] Guest: shows `name`, `phone`, `delivery_address` fields
+  - [x] "Continue to Payment" button — disabled while `isLoading`
+  - [x] All field validation: non-empty strings; `delivery_address` min 5 chars
 
-- [ ] Task 4: Create `frontend/src/components/features/checkout/mock-payment-form.tsx` (AC: 3, 4, 7)
-  - [ ] `'use client'` directive
-  - [ ] Props: `{ onSubmit: (data: MockPaymentData) => void; onBack: () => void; isLoading: boolean; error?: string | null }`
-  - [ ] Fields: `card_number` (text), `expiry` (text, placeholder `MM/YY`), `cvv` (text)
-  - [ ] Validation: all three fields must be non-empty — no Luhn check or format check needed
-  - [ ] Show `error` prop as an inline error banner (red) if present (AC: 7)
-  - [ ] "Place Order" button — disabled while `isLoading`, shows spinner
-  - [ ] "← Back" button calls `onBack` to return to address step
+- [x] Task 4: Create `frontend/src/components/features/checkout/mock-payment-form.tsx` (AC: 3, 4, 7)
+  - [x] `'use client'` directive
+  - [x] Props: `{ onSubmit: (data: MockPaymentData) => void; onBack: () => void; isLoading: boolean; error?: string | null }`
+  - [x] Fields: `card_number` (text), `expiry` (text, placeholder `MM/YY`), `cvv` (text)
+  - [x] Validation: all three fields must be non-empty — no Luhn check or format check needed
+  - [x] Show `error` prop as an inline error banner (red) if present (AC: 7)
+  - [x] "Place Order" button — disabled while `isLoading`, shows spinner
+  - [x] "← Back" button calls `onBack` to return to address step
 
-- [ ] Task 5: Create `frontend/src/components/features/checkout/order-summary.tsx` (AC: 5)
-  - [ ] Props: `{ order: OrderResponse }`
-  - [ ] Display: order number, each item (name × qty at price = line_price), delivery address, subtotal
-  - [ ] "Your order is confirmed" heading in green
+- [x] Task 5: Create `frontend/src/components/features/checkout/order-summary.tsx` (AC: 5)
+  - [x] Props: `{ order: OrderResponse }`
+  - [x] Display: order number, each item (name × qty at price = line_price), delivery address, subtotal
+  - [x] "Your order is confirmed" heading in green
 
-- [ ] Task 6: Create `frontend/src/app/(shop)/checkout/page.tsx` (AC: 1, 2, 3, 4, 7)
-  - [ ] `'use client'` — checkout is client-side only per architecture
-  - [ ] Local state: `step: 'address' | 'payment'`, `checkoutData: CheckoutFormData | null`, `isLoading: boolean`, `paymentError: string | null`
-  - [ ] Read `user` and `isAuthenticated` from `useAuthStore`
-  - [ ] Read cart items from `useCartStore` — `serverCart.items` (registered) or `guestItems` (guest)
-  - [ ] If cart is empty on mount: redirect to `/cart` (empty cart → cannot checkout)
-  - [ ] Step 1 (address): render `<CheckoutForm>` — pre-fill `user.delivery_address` for registered users
-  - [ ] Step 2 (payment): render `<MockPaymentForm>` with `onBack` returning to step 1
-  - [ ] On payment form submit: call `submitOrder()` (see Dev Notes for full flow)
-  - [ ] After success: store order in `sessionStorage` under key `'sports-nutrition-last-order'`, then `router.push('/checkout/confirmation?order=' + order.order_number)`
-  - [ ] Call `clearCart()` from cart store after successful order creation
+- [x] Task 6: Create `frontend/src/app/(shop)/checkout/page.tsx` (AC: 1, 2, 3, 4, 7)
+  - [x] `'use client'` — checkout is client-side only per architecture
+  - [x] Local state: `step: 'address' | 'payment'`, `checkoutData: CheckoutFormData | null`, `isLoading: boolean`, `paymentError: string | null`
+  - [x] Read `user` and `isAuthenticated` from `useAuthStore`
+  - [x] Read cart items from `useCartStore` — `serverCart.items` (registered) or `guestItems` (guest)
+  - [x] If cart is empty on mount: redirect to `/cart` (empty cart → cannot checkout)
+  - [x] Step 1 (address): render `<CheckoutForm>` — pre-fill `user.delivery_address` for registered users
+  - [x] Step 2 (payment): render `<MockPaymentForm>` with `onBack` returning to step 1
+  - [x] On payment form submit: call `submitOrder()` (see Dev Notes for full flow)
+  - [x] After success: store order in `sessionStorage` under key `'sports-nutrition-last-order'`, then `router.push('/checkout/confirmation?order=' + order.order_number)`
+  - [x] Call `clearCart()` from cart store after successful order creation
 
-- [ ] Task 7: Create `frontend/src/app/(shop)/checkout/confirmation/page.tsx` (AC: 5, 6)
-  - [ ] `'use client'`
-  - [ ] Wrap in `<Suspense>` because this page uses `useSearchParams()` — Next.js App Router REQUIRES `Suspense` for `useSearchParams`
-  - [ ] Read `order_number` from URL: `const searchParams = useSearchParams(); const orderNumber = searchParams.get('order')`
-  - [ ] On mount: load `OrderResponse` from `sessionStorage` key `'sports-nutrition-last-order'`; if missing, show generic "Order `{orderNumber}` confirmed" message
-  - [ ] Render `<OrderSummary order={order}>` when order data is available
-  - [ ] `isAuthenticated` check via `useAuthStore`:
+- [x] Task 7: Create `frontend/src/app/(shop)/checkout/confirmation/page.tsx` (AC: 5, 6)
+  - [x] `'use client'`
+  - [x] Wrap in `<Suspense>` because this page uses `useSearchParams()` — Next.js App Router REQUIRES `Suspense` for `useSearchParams`
+  - [x] Read `order_number` from URL: `const searchParams = useSearchParams(); const orderNumber = searchParams.get('order')`
+  - [x] On mount: load `OrderResponse` from `sessionStorage` key `'sports-nutrition-last-order'`; if missing, show generic "Order `{orderNumber}` confirmed" message
+  - [x] Render `<OrderSummary order={order}>` when order data is available
+  - [x] `isAuthenticated` check via `useAuthStore`:
     - If authenticated: show "Continue Shopping" link + link to `/account/orders` (story 3.5 will implement this page; link is fine now)
     - If not authenticated (guest): show registration prompt (Task 8 component)
-  - [ ] Clear `sessionStorage` key after reading (one-time display)
+  - [x] Clear `sessionStorage` key after reading (one-time display)
 
-- [ ] Task 8: Create `frontend/src/components/features/checkout/guest-register-prompt.tsx` (AC: 6)
-  - [ ] `'use client'`
-  - [ ] Props: `{ pendingOrderItems: Array<{product_id: number, quantity: number}>; deliveryAddress: string; subtotal: string }`
-  - [ ] Shows: "Create an account to track your order" heading
-  - [ ] Fields: `name`, `phone`, `password`
-  - [ ] On submit: call `POST /api/v1/auth/register/` → auto-login → `POST /api/v1/orders/` with the pending order payload → set auth in Zustand → update sessionStorage with real `OrderResponse` — the page re-renders without the prompt since `isAuthenticated` is now true
-  - [ ] Handle `phone_already_registered` 400 error: show inline message "This phone is already registered — please log in"
-  - [ ] After successful registration + order creation: call `clearCart()`
+- [x] Task 8: Create `frontend/src/components/features/checkout/guest-register-prompt.tsx` (AC: 6)
+  - [x] `'use client'`
+  - [x] Props: `{ pendingOrderItems: Array<{product_id: number, quantity: number}>; deliveryAddress: string; subtotal: string }`
+  - [x] Shows: "Create an account to track your order" heading
+  - [x] Fields: `name`, `phone`, `password`
+  - [x] On submit: call `POST /api/v1/auth/register/` → auto-login → `POST /api/v1/orders/` with the pending order payload → set auth in Zustand → update sessionStorage with real `OrderResponse` — the page re-renders without the prompt since `isAuthenticated` is now true
+  - [x] Handle `phone_already_registered` 400 error: show inline message "This phone is already registered — please log in"
+  - [x] After successful registration + order creation: call `clearCart()`
 
 ## Dev Notes
 
@@ -428,6 +428,28 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- LoginView returns only `{ access_token }` — no user object. Added profile fetch step after login in both `loginUser` helper and `GuestRegisterPrompt` to get full `User` data before calling `setAuth`.
+- `UserProfileSerializer` returns `['id', 'name', 'phone', 'delivery_address']` — no `is_staff` field; `User` interface type cast used without `is_staff`.
+- Pre-existing TypeScript errors in `src/test/search-filter.test.tsx` unrelated to this story.
+
 ### Completion Notes List
 
+- Implemented full checkout flow: address form → mock payment form → order creation → confirmation page.
+- Guest flow: deferred order creation — stores pendingOrder in sessionStorage, completes registration on confirmation page via GuestRegisterPrompt, then creates order with token.
+- Registered user flow: pre-fills delivery_address from Zustand auth store, calls `POST /api/v1/orders/` directly on payment submit.
+- Confirmation page wraps `useSearchParams()` in `<Suspense>` per Next.js App Router requirement.
+- `sessionStorage` key `'sports-nutrition-last-order'` is cleared after first read (one-time display).
+- Build passes (`next build`) with `/checkout` and `/checkout/confirmation` as static routes.
+- Added `ORDER_ENDPOINTS`, `createOrder`, and `loginUser` to `lib/api.ts`.
+- Added `OrderItemResponse`, `OrderResponse`, `PendingGuestOrder` types to `types/order.ts` without removing existing interfaces.
+
 ### File List
+
+- frontend/src/types/order.ts (modified)
+- frontend/src/lib/api.ts (modified)
+- frontend/src/components/features/checkout/checkout-form.tsx (created)
+- frontend/src/components/features/checkout/mock-payment-form.tsx (created)
+- frontend/src/components/features/checkout/order-summary.tsx (created)
+- frontend/src/components/features/checkout/guest-register-prompt.tsx (created)
+- frontend/src/app/(shop)/checkout/page.tsx (created)
+- frontend/src/app/(shop)/checkout/confirmation/page.tsx (created)

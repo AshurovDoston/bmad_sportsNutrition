@@ -2,7 +2,8 @@ import { useAuthStore } from '@/store/auth'
 import { refreshAccessToken } from '@/lib/auth'
 import type { GoalCategory, ProductListItem, ProductDetailItem, PaginatedResponse, ProductsQueryParams } from '@/types/product'
 import type { ConfusionEntry } from '@/types/content'
-import type { ServerCart } from '@/types/order'
+import type { ServerCart, OrderResponse } from '@/types/order'
+import type { User } from '@/types/user'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -146,6 +147,44 @@ export async function mergeServerCart(
   })
   if (!res.ok) throw new Error('Failed to merge cart')
   return res.json() as Promise<ServerCart>
+}
+
+export const ORDER_ENDPOINTS = {
+  ORDERS: '/api/v1/orders/',
+} as const
+
+export async function createOrder(payload: {
+  delivery_address: string
+  items: Array<{ product_id: number; quantity: number }>
+}): Promise<OrderResponse> {
+  const res = await apiFetch(ORDER_ENDPOINTS.ORDERS, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw data
+  }
+  return res.json() as Promise<OrderResponse>
+}
+
+export async function loginUser(phone: string, password: string): Promise<{ access_token: string; user: User }> {
+  const loginRes = await fetch(apiUrl(AUTH_ENDPOINTS.LOGIN), {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, password }),
+  })
+  if (!loginRes.ok) throw new Error('Login failed')
+  const { access_token } = await loginRes.json() as { access_token: string }
+  // LoginView returns only access_token; fetch profile to get user data
+  const profileRes = await fetch(apiUrl(AUTH_ENDPOINTS.PROFILE), {
+    headers: { Authorization: `Bearer ${access_token}` },
+    credentials: 'include',
+  })
+  if (!profileRes.ok) throw new Error('Profile fetch failed')
+  const user = await profileRes.json() as User
+  return { access_token, user }
 }
 
 export async function getProducts(params?: ProductsQueryParams): Promise<PaginatedResponse<ProductListItem>> {
