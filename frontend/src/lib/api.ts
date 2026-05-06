@@ -151,6 +151,7 @@ export async function mergeServerCart(
 
 export const ORDER_ENDPOINTS = {
   ORDERS: '/api/v1/orders/',
+  ORDER_DETAIL: (id: number) => `/api/v1/orders/${id}/`,
 } as const
 
 export async function createOrder(payload: {
@@ -165,6 +166,18 @@ export async function createOrder(payload: {
     const data = await res.json()
     throw data
   }
+  return res.json() as Promise<OrderResponse>
+}
+
+export async function getOrders(): Promise<OrderResponse[]> {
+  const res = await apiFetch(ORDER_ENDPOINTS.ORDERS)
+  if (!res.ok) throw new Error('Failed to fetch orders')
+  return res.json() as Promise<OrderResponse[]>
+}
+
+export async function getOrderDetail(id: number): Promise<OrderResponse> {
+  const res = await apiFetch(ORDER_ENDPOINTS.ORDER_DETAIL(id))
+  if (!res.ok) throw new Error('Failed to fetch order')
   return res.json() as Promise<OrderResponse>
 }
 

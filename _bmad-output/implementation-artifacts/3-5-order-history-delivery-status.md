@@ -1,6 +1,6 @@
 # Story 3.5: Order History & Delivery Status
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -19,49 +19,49 @@ so that I have a complete purchase record and never need to contact support.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add `GET` handler to `OrderCreateView` in `backend/orders/views.py` (AC: 4)
-  - [ ] Add `get(self, request)` method: `Order.objects.filter(user=request.user).order_by('-created_at')` — serialize with `OrderResponseSerializer(orders, many=True)`
-  - [ ] Return `Response(data)` with HTTP 200
-  - [ ] No URL change needed — `orders/` already maps to `OrderCreateView`
+- [x] Task 1: Add `GET` handler to `OrderCreateView` in `backend/orders/views.py` (AC: 4)
+  - [x] Add `get(self, request)` method: `Order.objects.filter(user=request.user).order_by('-created_at')` — serialize with `OrderResponseSerializer(orders, many=True)`
+  - [x] Return `Response(data)` with HTTP 200
+  - [x] No URL change needed — `orders/` already maps to `OrderCreateView`
 
-- [ ] Task 2: Create `OrderDetailView` in `backend/orders/views.py` (AC: 5)
-  - [ ] New class `OrderDetailView(APIView)` with `permission_classes = [IsAuthenticated]`
-  - [ ] `get(self, request, pk)`: use `get_object_or_404(Order, pk=pk, user=request.user)` — this naturally returns 404 for both missing AND wrong-user cases (no info leakage)
-  - [ ] Return `Response(OrderResponseSerializer(order).data)`
+- [x] Task 2: Create `OrderDetailView` in `backend/orders/views.py` (AC: 5)
+  - [x] New class `OrderDetailView(APIView)` with `permission_classes = [IsAuthenticated]`
+  - [x] `get(self, request, pk)`: use `get_object_or_404(Order, pk=pk, user=request.user)` — this naturally returns 404 for both missing AND wrong-user cases (no info leakage)
+  - [x] Return `Response(OrderResponseSerializer(order).data)`
 
-- [ ] Task 3: Update `backend/orders/urls.py` (AC: 2, 5)
-  - [ ] Add `OrderDetailView` to imports
-  - [ ] Add `path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail')`
+- [x] Task 3: Update `backend/orders/urls.py` (AC: 2, 5)
+  - [x] Add `OrderDetailView` to imports
+  - [x] Add `path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail')`
 
-- [ ] Task 4: Write backend tests in `backend/orders/tests.py` (AC: 4, 5)
-  - [ ] `test_get_orders_requires_auth` → 401
-  - [ ] `test_get_orders_returns_only_own_orders` — create 2 users each with 1 order; user1 sees only user1's order
-  - [ ] `test_get_orders_empty_list` → 200 with `[]`
-  - [ ] `test_get_order_detail_requires_auth` → 401
-  - [ ] `test_get_order_detail_returns_own_order` → 200 with correct fields
-  - [ ] `test_get_order_detail_other_users_order_returns_404` — create order for user2, user1 requests it → 404
+- [x] Task 4: Write backend tests in `backend/orders/tests.py` (AC: 4, 5)
+  - [x] `test_get_orders_requires_auth` → 401
+  - [x] `test_get_orders_returns_only_own_orders` — create 2 users each with 1 order; user1 sees only user1's order
+  - [x] `test_get_orders_empty_list` → 200 with `[]`
+  - [x] `test_get_order_detail_requires_auth` → 401
+  - [x] `test_get_order_detail_returns_own_order` → 200 with correct fields
+  - [x] `test_get_order_detail_other_users_order_returns_404` — create order for user2, user1 requests it → 404
 
-- [ ] Task 5: Update `frontend/src/lib/api.ts` — add order list/detail functions (AC: 1, 2)
-  - [ ] Extend `ORDER_ENDPOINTS` with `ORDER_DETAIL: (id: number) => \`/api/v1/orders/${id}/\``
-  - [ ] Add `getOrders(): Promise<OrderResponse[]>` using `apiFetch`
-  - [ ] Add `getOrderDetail(id: number): Promise<OrderResponse>` using `apiFetch`
+- [x] Task 5: Update `frontend/src/lib/api.ts` — add order list/detail functions (AC: 1, 2)
+  - [x] Extend `ORDER_ENDPOINTS` with `ORDER_DETAIL: (id: number) => \`/api/v1/orders/${id}/\``
+  - [x] Add `getOrders(): Promise<OrderResponse[]>` using `apiFetch`
+  - [x] Add `getOrderDetail(id: number): Promise<OrderResponse>` using `apiFetch`
 
-- [ ] Task 6: Create `frontend/src/app/account/orders/page.tsx` — order list page (AC: 1, 6)
-  - [ ] `'use client'` directive
-  - [ ] TanStack Query: `useQuery({ queryKey: ['orders'], queryFn: getOrders })`
-  - [ ] Skeleton on `isLoading`; error message on `isError`
-  - [ ] Each order row: order number, formatted date, subtotal, status badge
-  - [ ] Each row wraps in `<Link href={/account/orders/${order.order_id}}>` (use `order_id` — numeric DB id)
-  - [ ] Empty state: "No orders yet. Start shopping!" with link to `/products`
+- [x] Task 6: Create `frontend/src/app/account/orders/page.tsx` — order list page (AC: 1, 6)
+  - [x] `'use client'` directive
+  - [x] TanStack Query: `useQuery({ queryKey: ['orders'], queryFn: getOrders })`
+  - [x] Skeleton on `isLoading`; error message on `isError`
+  - [x] Each order row: order number, formatted date, subtotal, status badge
+  - [x] Each row wraps in `<Link href={/account/orders/${order.order_id}}>` (use `order_id` — numeric DB id)
+  - [x] Empty state: "No orders yet. Start shopping!" with link to `/products`
 
-- [ ] Task 7: Create `frontend/src/app/account/orders/[id]/page.tsx` — order detail page (AC: 2, 3)
-  - [ ] `'use client'` directive
-  - [ ] Use `useParams()` from `next/navigation` to get `id`; parse with `Number(params.id)`
-  - [ ] TanStack Query: `useQuery({ queryKey: ['order', id], queryFn: () => getOrderDetail(id) })`
-  - [ ] Display: order number, created_at (formatted), delivery address, subtotal, status badge
-  - [ ] Itemized list: `product_name × quantity at product_price = line_price` for each `OrderItemResponse`
-  - [ ] Status "dispatched" → amber/yellow visual highlight (see styling note in Dev Notes)
-  - [ ] "← Back to Orders" link to `/account/orders`
+- [x] Task 7: Create `frontend/src/app/account/orders/[id]/page.tsx` — order detail page (AC: 2, 3)
+  - [x] `'use client'` directive
+  - [x] Use `useParams()` from `next/navigation` to get `id`; parse with `Number(params.id)`
+  - [x] TanStack Query: `useQuery({ queryKey: ['order', id], queryFn: () => getOrderDetail(id) })`
+  - [x] Display: order number, created_at (formatted), delivery address, subtotal, status badge
+  - [x] Itemized list: `product_name × quantity at product_price = line_price` for each `OrderItemResponse`
+  - [x] Status "dispatched" → amber/yellow visual highlight (see styling note in Dev Notes)
+  - [x] "← Back to Orders" link to `/account/orders`
 
 ## Dev Notes
 
@@ -289,10 +289,48 @@ def make_order(user, address='Tashkent, Test St 1', status='pending'):
 
 ### Agent Model Used
 
-claude-sonnet-4-6
+claude-opus-4-7
 
 ### Debug Log References
 
+- Backend tests: `docker compose exec -T backend python manage.py test orders` → 42/42 passing (10 new + 32 pre-existing)
+- Full backend suite: `docker compose exec -T backend python manage.py test` → 85/85 passing
+- Frontend tests: `docker compose exec -T frontend npm test` → 42/42 passing (no regressions)
+- TS errors / lint warnings observed are pre-existing in `src/test/search-filter.test.tsx` and `app/(shop)/checkout/`; none from new files
+- End-to-end smoke test (manual via `curl` against running stack):
+  - User A (own orders): list returns only own; detail returns own → ✅
+  - User B (other user): list empty; detail of A's order returns 404 (not 403) → ✅ AC5 no info leakage
+  - Unauthenticated `/account/orders` → 307 redirect to `/login` via existing middleware → ✅ AC6
+
 ### Completion Notes List
 
+- AC1: `/account/orders` shows order rows with order number, formatted date, subtotal, and status badge.
+- AC2: Each row links to `/account/orders/{order_id}`; detail page shows itemized products (name × qty at price = line price), delivery address, status, subtotal.
+- AC3: `dispatched` status renders with amber styling (`bg-amber-*`/`text-amber-*`), distinct from delivered (green), confirmed (blue), pending (zinc).
+- AC4: `GET /api/v1/orders/` filters by `request.user`; cross-user verified empty in tests + manual smoke.
+- AC5: `GET /api/v1/orders/{id}/` uses `get_object_or_404(Order, pk=pk, user=request.user)` — wrong user gets 404, identical to non-existent order. Verified by `test_get_order_detail_other_users_order_returns_404` and manual curl test.
+- AC6: `frontend/src/middleware.ts` already covers `/account/:path*`; verified `/account/orders` and `/account/orders/1` return 307 → `/login` for anonymous users without code change.
+- No new types, serializers, or migrations introduced (all reused from prior stories per Dev Notes).
+- `OrderCreateView` extended with `get()` (post unchanged); new `OrderDetailView` keeps view module cohesive without scope creep.
+
 ### File List
+
+Backend
+- `backend/orders/views.py` (MODIFIED) — added `get()` to `OrderCreateView`; new `OrderDetailView` class
+- `backend/orders/urls.py` (MODIFIED) — added `OrderDetailView` import + `orders/<int:pk>/` route
+- `backend/orders/tests.py` (MODIFIED) — added `make_order` helper, `OrderListTests` (5 tests), `OrderDetailTests` (5 tests)
+
+Frontend
+- `frontend/src/lib/api.ts` (MODIFIED) — added `ORDER_ENDPOINTS.ORDER_DETAIL`, `getOrders()`, `getOrderDetail()`
+- `frontend/src/app/account/orders/page.tsx` (NEW) — order list page (TanStack Query)
+- `frontend/src/app/account/orders/[id]/page.tsx` (NEW) — order detail page (TanStack Query + `useParams`)
+
+Sprint / story tracking
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (MODIFIED) — story status `ready-for-dev` → `in-progress` → `review`
+- `_bmad-output/implementation-artifacts/3-5-order-history-delivery-status.md` (MODIFIED) — task checkboxes, Dev Agent Record, File List, Change Log, status
+
+## Change Log
+
+| Date       | Author        | Change                                                                                  |
+| ---------- | ------------- | --------------------------------------------------------------------------------------- |
+| 2026-05-06 | Doston (dev)  | Implemented order history list & detail (backend GET endpoints + frontend pages); status → review |

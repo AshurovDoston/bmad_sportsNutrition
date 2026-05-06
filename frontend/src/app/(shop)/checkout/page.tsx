@@ -14,15 +14,13 @@ import type { ApiError } from '@/types/user'
 export default function CheckoutPage() {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const isAuth = useAuthStore((state) => state.accessToken !== null)
   const { serverCart, guestItems, fetchServerCart, clearCart, isLoading: cartLoading } = useCartStore()
 
   const [step, setStep] = useState<'address' | 'payment'>('address')
   const [checkoutData, setCheckoutData] = useState<CheckoutFormData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
-
-  const isAuth = isAuthenticated()
 
   useEffect(() => {
     if (isAuth && !serverCart) {

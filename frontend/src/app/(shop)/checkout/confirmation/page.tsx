@@ -15,7 +15,7 @@ type StoredOrder =
 function ConfirmationContent() {
   const searchParams = useSearchParams()
   const orderNumber = searchParams.get('order')
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const isAuth = useAuthStore((state) => state.accessToken !== null)
 
   const [confirmedOrder, setConfirmedOrder] = useState<OrderResponse | null>(null)
   const [pendingOrder, setPendingOrder] = useState<PendingGuestOrder | null>(null)
@@ -43,8 +43,6 @@ function ConfirmationContent() {
     setPendingOrder(null)
     setGuestData(null)
   }
-
-  const isAuth = isAuthenticated()
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12 space-y-8">

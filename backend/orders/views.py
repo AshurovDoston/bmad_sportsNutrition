@@ -89,6 +89,10 @@ class CartMergeView(APIView):
 class OrderCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        return Response(OrderResponseSerializer(orders, many=True).data)
+
     def post(self, request):
         serializer = OrderCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -156,6 +160,14 @@ class OrderCreateView(APIView):
             OrderResponseSerializer(order).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class OrderDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        order = get_object_or_404(Order, pk=pk, user=request.user)
+        return Response(OrderResponseSerializer(order).data)
 
 
 def _send_order_confirmation(order, user):

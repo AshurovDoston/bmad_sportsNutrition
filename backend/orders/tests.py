@@ -315,3 +315,107 @@ class OrderAtomicTests(TestCase):
         self.assertEqual(Order.objects.count(), 0)
         good.refresh_from_db()
         self.assertEqual(good.stock_quantity, 5)  # not decremented
+
+
+def make_order(user, address='Tashkent, Test St 1', subtotal='79.97', status='pending'):
+    from .models import Order
+    return Order.objects.create(
+        user=user, delivery_address=address, subtotal=subtotal, status=status
+    )
+
+
+class OrderListTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user()
+        self.client.force_authenticate(user=self.user)
+
+    def test_get_orders_requires_auth(self):
+        unauth_client = APIClient()
+        res = unauth_client.get(ORDERS_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_orders_returns_only_own_orders(self):
+        other_user = make_user(phone='+998907654321', name='Other')
+        own_order = make_order(self.user, address='My Addr')
+        make_order(other_user, address='Other Addr')
+
+        res = self.client.get(ORDERS_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['order_id'], own_order.id)
+
+    def test_get_orders_empty_list(self):
+        res = self.client.get(ORDERS_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, [])
+
+    def test_get_orders_response_fields(self):
+        make_order(self.user)
+        res = self.client.get(ORDERS_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        for field in ['order_id', 'order_number', 'items', 'subtotal', 'delivery_address', 'status', 'created_at']:
+            self.assertIn(field, res.data[0])
+
+    def test_get_orders_sorted_by_created_at_desc(self):
+        older = make_order(self.user, address='Older')
+        newer = make_order(self.user, address='Newer')
+        # Force older order to look older
+        from .models import Order
+        from django.utils import timezone
+        from datetime import timedelta
+        Order.objects.filter(pk=older.pk).update(created_at=timezone.now() - timedelta(days=1))
+
+        res = self.client.get(ORDERS_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['order_id'], newer.id)
+        self.assertEqual(res.data[1]['order_id'], older.id)
+
+
+class OrderDetailTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user()
+        self.client.force_authenticate(user=self.user)
+
+    def test_get_order_detail_requires_auth(self):
+        order = make_order(self.user)
+        unauth_client = APIClient()
+        res = unauth_client.get(f'{ORDERS_URL}{order.id}/')
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_order_detail_returns_own_order(self):
+        order = make_order(self.user, address='My Addr', subtotal='49.99')
+        res = self.client.get(f'{ORDERS_URL}{order.id}/')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['order_id'], order.id)
+        self.assertEqual(res.data['delivery_address'], 'My Addr')
+        self.assertEqual(res.data['subtotal'], '49.99')
+        for field in ['order_id', 'order_number', 'items', 'subtotal', 'delivery_address', 'status', 'created_at']:
+            self.assertIn(field, res.data)
+
+    def test_get_order_detail_other_users_order_returns_404(self):
+        other_user = make_user(phone='+998907654321', name='Other')
+        other_order = make_order(other_user, address='Other Addr')
+        res = self.client.get(f'{ORDERS_URL}{other_order.id}/')
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_order_detail_nonexistent_returns_404(self):
+        res = self.client.get(f'{ORDERS_URL}99999/')
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_order_detail_includes_items(self):
+        from .models import OrderItem
+        order = make_order(self.user)
+        product = make_product(name='Whey', slug='whey-detail', price='29.99')
+        OrderItem.objects.create(
+            order=order, product=product, product_name='Whey',
+            product_price='29.99', quantity=2,
+        )
+        res = self.client.get(f'{ORDERS_URL}{order.id}/')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['items']), 1)
+        self.assertEqual(res.data['items'][0]['product_name'], 'Whey')
+        self.assertEqual(res.data['items'][0]['quantity'], 2)
+        self.assertEqual(res.data['items'][0]['line_price'], '59.98')
