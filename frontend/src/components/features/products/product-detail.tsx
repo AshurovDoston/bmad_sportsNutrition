@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useState } from 'react'
 import { DELIVERY_TIME_HOURS } from '@/lib/constants'
 import { useCartStore } from '@/store/cart'
 import type { ProductDetailItem } from '@/types/product'
@@ -19,6 +20,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export function ProductDetailView({ product }: Props) {
   const { addItem } = useCartStore()
+  const [added, setAdded] = useState(false)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -106,11 +108,15 @@ export function ProductDetailView({ product }: Props) {
           )}
 
           <button
-            onClick={() => addItem(product.id)}
+            onClick={async () => {
+              await addItem(product)
+              setAdded(true)
+              setTimeout(() => setAdded(false), 2000)
+            }}
             disabled={!product.is_in_stock}
             className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
-            {product.is_in_stock ? 'Add to Cart' : 'Out of Stock'}
+            {added ? 'Added!' : product.is_in_stock ? 'Add to Cart' : 'Out of Stock'}
           </button>
         </div>
       </div>

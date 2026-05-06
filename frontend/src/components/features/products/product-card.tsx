@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { DELIVERY_TIME_HOURS } from '@/lib/constants'
 import { useCartStore } from '@/store/cart'
 import type { ProductListItem } from '@/types/product'
@@ -13,6 +14,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCartStore()
   const goalBadge = product.goal_categories[0] ?? ''
+  const [added, setAdded] = useState(false)
 
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
@@ -67,11 +69,15 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="flex items-center justify-end px-4 pb-4">
         <button
-          onClick={() => addItem(product.id)}
+          onClick={async () => {
+            await addItem(product)
+            setAdded(true)
+            setTimeout(() => setAdded(false), 2000)
+          }}
           disabled={!product.is_in_stock}
           className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
-          {product.is_in_stock ? 'Add to Cart' : 'Out of Stock'}
+          {added ? 'Added!' : product.is_in_stock ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>
     </div>

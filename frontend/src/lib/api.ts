@@ -2,6 +2,8 @@ import { useAuthStore } from '@/store/auth'
 import { refreshAccessToken } from '@/lib/auth'
 import type { GoalCategory, ProductListItem, ProductDetailItem, PaginatedResponse, ProductsQueryParams } from '@/types/product'
 import type { ConfusionEntry } from '@/types/content'
+import type { ServerCart, OrderResponse } from '@/types/order'
+import type { User } from '@/types/user'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -97,6 +99,105 @@ export async function getConfusionEntries(): Promise<ConfusionEntry[]> {
   })
   if (!res.ok) throw new Error('Failed to fetch confusion entries')
   return res.json() as Promise<ConfusionEntry[]>
+}
+
+export const CART_ENDPOINTS = {
+  CART: '/api/v1/cart/',
+  ITEMS: '/api/v1/cart/items/',
+  ITEM: (id: number) => `/api/v1/cart/items/${id}/`,
+  MERGE: '/api/v1/cart/merge/',
+} as const
+
+export async function getServerCart(): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.CART)
+  if (!res.ok) throw new Error('Failed to fetch cart')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function addServerCartItem(productId: number, quantity: number): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.ITEMS, {
+    method: 'POST',
+    body: JSON.stringify({ product_id: productId, quantity }),
+  })
+  if (!res.ok) throw new Error('Failed to add item')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function updateServerCartItem(itemId: number, quantity: number): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.ITEM(itemId), {
+    method: 'PATCH',
+    body: JSON.stringify({ quantity }),
+  })
+  if (!res.ok) throw new Error('Failed to update item')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function removeServerCartItem(itemId: number): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.ITEM(itemId), { method: 'DELETE' })
+  if (!res.ok) throw new Error('Failed to remove item')
+  return res.json() as Promise<ServerCart>
+}
+
+export async function mergeServerCart(
+  items: Array<{ product_id: number; quantity: number }>
+): Promise<ServerCart> {
+  const res = await apiFetch(CART_ENDPOINTS.MERGE, {
+    method: 'POST',
+    body: JSON.stringify(items),
+  })
+  if (!res.ok) throw new Error('Failed to merge cart')
+  return res.json() as Promise<ServerCart>
+}
+
+export const ORDER_ENDPOINTS = {
+  ORDERS: '/api/v1/orders/',
+  ORDER_DETAIL: (id: number) => `/api/v1/orders/${id}/`,
+} as const
+
+export async function createOrder(payload: {
+  delivery_address: string
+  items: Array<{ product_id: number; quantity: number }>
+}): Promise<OrderResponse> {
+  const res = await apiFetch(ORDER_ENDPOINTS.ORDERS, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw data
+  }
+  return res.json() as Promise<OrderResponse>
+}
+
+export async function getOrders(): Promise<OrderResponse[]> {
+  const res = await apiFetch(ORDER_ENDPOINTS.ORDERS)
+  if (!res.ok) throw new Error('Failed to fetch orders')
+  return res.json() as Promise<OrderResponse[]>
+}
+
+export async function getOrderDetail(id: number): Promise<OrderResponse> {
+  const res = await apiFetch(ORDER_ENDPOINTS.ORDER_DETAIL(id))
+  if (!res.ok) throw new Error('Failed to fetch order')
+  return res.json() as Promise<OrderResponse>
+}
+
+export async function loginUser(phone: string, password: string): Promise<{ access_token: string; user: User }> {
+  const loginRes = await fetch(apiUrl(AUTH_ENDPOINTS.LOGIN), {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, password }),
+  })
+  if (!loginRes.ok) throw new Error('Login failed')
+  const { access_token } = await loginRes.json() as { access_token: string }
+  // LoginView returns only access_token; fetch profile to get user data
+  const profileRes = await fetch(apiUrl(AUTH_ENDPOINTS.PROFILE), {
+    headers: { Authorization: `Bearer ${access_token}` },
+    credentials: 'include',
+  })
+  if (!profileRes.ok) throw new Error('Profile fetch failed')
+  const user = await profileRes.json() as User
+  return { access_token, user }
 }
 
 export async function getProducts(params?: ProductsQueryParams): Promise<PaginatedResponse<ProductListItem>> {

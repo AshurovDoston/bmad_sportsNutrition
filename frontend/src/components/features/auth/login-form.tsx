@@ -5,12 +5,14 @@ import { useMutation } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { apiFetch, AUTH_ENDPOINTS } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
+import { useCartStore } from '@/store/cart'
 import { LoginResponse, ApiError } from '@/types/user'
 
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { setAuth } = useAuthStore()
+  const mergeGuestCart = useCartStore((state) => state.mergeGuestCart)
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [credentialsError, setCredentialsError] = useState<string | null>(null)
@@ -28,8 +30,9 @@ export function LoginForm() {
       }
       return data as LoginResponse
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setAuth(data.access_token, null)
+      await mergeGuestCart()
       const next = searchParams.get('next') || '/'
       router.push(next)
     },
