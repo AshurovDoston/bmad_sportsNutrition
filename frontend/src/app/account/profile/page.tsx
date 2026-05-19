@@ -1,11 +1,12 @@
 'use client'
 
 import { ProfileForm } from '@/components/features/auth/profile-form'
+import { Container } from '@/components/layout/container'
 
 export default function ProfilePage() {
   return (
-    <main className="flex min-h-screen items-start justify-center px-4 pt-16">
+    <Container className="flex items-start justify-center pt-16 pb-12">
       <ProfileForm />
-    </main>
+    </Container>
   )
 }

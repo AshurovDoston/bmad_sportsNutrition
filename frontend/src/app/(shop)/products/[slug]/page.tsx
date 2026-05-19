@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductDetail } from '@/lib/api'
 import { ProductDetailView } from '@/components/features/products/product-detail'
+import { Container } from '@/components/layout/container'
 
 export default async function ProductDetailPage({
   params,
@@ -21,8 +22,8 @@ export default async function ProductDetailPage({
   }
 
   return (
-    <main>
-      <div className="mx-auto max-w-5xl px-4 pt-6">
+    <Container as="section">
+      <div className="mx-auto max-w-5xl pt-6">
         <Link
           href="/products"
           className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
@@ -31,6 +32,6 @@ export default async function ProductDetailPage({
         </Link>
       </div>
       <ProductDetailView product={product} />
-    </main>
+    </Container>
   )
 }

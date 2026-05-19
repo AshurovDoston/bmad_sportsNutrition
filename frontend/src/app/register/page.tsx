@@ -1,9 +1,10 @@
 import { RegisterForm } from '@/components/features/auth/register-form'
+import { Container } from '@/components/layout/container'
 
 export default function RegisterPage() {
   return (
-    <main className="flex flex-1 items-center justify-center p-8">
+    <Container className="flex flex-1 items-center justify-center py-12">
       <RegisterForm />
-    </main>
+    </Container>
   )
 }

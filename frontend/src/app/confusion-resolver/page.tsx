@@ -1,6 +1,7 @@
 import { getConfusionEntries } from '@/lib/api'
 import type { ConfusionEntry } from '@/types/content'
 import Link from 'next/link'
+import { Container } from '@/components/layout/container'
 
 export const dynamic = 'force-static'
 
@@ -14,15 +15,15 @@ export default async function ConfusionResolverPage() {
 
   if (entries.length === 0) {
     return (
-      <main className="container mx-auto px-4 py-8">
+      <Container className="py-8">
         <h1 className="text-3xl font-bold mb-6">Confusion Resolver</h1>
         <p className="text-zinc-500">Check back soon for expert answers</p>
-      </main>
+      </Container>
     )
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <Container className="py-8">
       <h1 className="text-3xl font-bold mb-6">Confusion Resolver</h1>
       <div className="space-y-4">
         {entries.map((entry) => (
@@ -52,6 +53,6 @@ export default async function ConfusionResolverPage() {
           </details>
         ))}
       </div>
-    </main>
+    </Container>
   )
 }

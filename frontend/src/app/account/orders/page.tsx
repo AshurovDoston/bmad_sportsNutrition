@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { getOrders } from '@/lib/api'
 import type { OrderResponse } from '@/types/order'
+import { Container } from '@/components/layout/container'
+import { buttonClasses } from '@/components/ui/button'
 
 const STATUS_STYLES: Record<OrderResponse['status'], string> = {
   pending: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
@@ -37,7 +39,8 @@ export default function OrdersPage() {
   })
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <Container className="py-12">
+      <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-8">My Orders</h1>
 
       {isLoading && (
@@ -62,7 +65,7 @@ export default function OrdersPage() {
           <p className="text-sm text-zinc-500 dark:text-zinc-400">No orders yet. Start shopping!</p>
           <Link
             href="/products"
-            className="mt-4 inline-block rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className={buttonClasses({ variant: 'primary', size: 'md', className: 'mt-4 inline-flex' })}
           >
             Browse Products
           </Link>
@@ -98,6 +101,7 @@ export default function OrdersPage() {
           ))}
         </ul>
       )}
-    </main>
+      </div>
+    </Container>
   )
 }

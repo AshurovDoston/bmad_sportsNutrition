@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { DELIVERY_TIME_HOURS } from '@/lib/constants'
 import { useCartStore } from '@/store/cart'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import type { ProductListItem } from '@/types/product'
 
 interface ProductCardProps {
@@ -17,7 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const [added, setAdded] = useState(false)
 
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+    <Card variant="interactive" className="flex w-full flex-col overflow-hidden">
       <Link href={`/products/${product.slug}`} className="contents">
         <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
           {product.primary_image_url ? (
@@ -34,9 +37,9 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           {!product.is_in_stock && (
-            <span className="absolute left-2 top-2 rounded bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+            <Badge variant="out-of-stock" className="absolute left-2 top-2 px-2 py-0.5 font-semibold">
               Out of Stock
-            </span>
+            </Badge>
           )}
         </div>
 
@@ -46,9 +49,9 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
 
           {goalBadge && (
-            <span className="w-fit rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            <Badge variant="goal" className="w-fit">
               {goalBadge.replace(/_/g, ' ')}
-            </span>
+            </Badge>
           )}
 
           <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
@@ -68,18 +71,19 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       <div className="flex items-center justify-end px-4 pb-4">
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           onClick={async () => {
             await addItem(product)
             setAdded(true)
             setTimeout(() => setAdded(false), 2000)
           }}
           disabled={!product.is_in_stock}
-          className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           {added ? 'Added!' : product.is_in_stock ? 'Add to Cart' : 'Out of Stock'}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   )
 }

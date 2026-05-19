@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { DELIVERY_TIME_HOURS } from '@/lib/constants'
+import { buttonClasses } from '@/components/ui/button'
 
 interface CartSummaryProps {
   subtotal: string
@@ -22,7 +23,7 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
 
       <Link
         href="/checkout"
-        className="mt-6 block w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+        className={buttonClasses({ variant: 'primary', size: 'lg', className: 'mt-6 w-full' })}
       >
         Proceed to Checkout
       </Link>

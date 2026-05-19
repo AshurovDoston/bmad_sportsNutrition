@@ -1,8 +1,9 @@
 import { GoalSelector } from '@/components/features/products/goal-selector'
+import { Container } from '@/components/layout/container'
 
 export default function Home() {
   return (
-    <main className="container mx-auto px-4 py-16">
+    <Container as="section" className="py-16">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           What&apos;s your fitness goal?
@@ -12,6 +13,6 @@ export default function Home() {
         </p>
       </div>
       <GoalSelector />
-    </main>
+    </Container>
   )
 }
